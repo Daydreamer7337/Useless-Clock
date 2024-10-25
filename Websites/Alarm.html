@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Clock</title>
+    <style>
+        body{
+            margin: 0;
+        }
+        .header{
+            height: 60px;
+            width: 100%;
+            background: linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);
+            padding-top: 10px;
+        }
+        #Heading{
+            margin: 0;
+            text-align: center;
+            color: lavender;
+            font-family: Helvetica Neue, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 100%;
+        }
+        .content{
+            height: 750px;
+            width: 100%;
+            background: linear-gradient(0deg, rgba(96,63,131,1) 0%, rgba(199,211,212,1) 1%, rgba(199,211,212,1) 99%, rgba(96,63,131,1) 100%);  
+        }
+        .footer{
+            height: 60px;
+            width: 100%;
+            background: linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);
+            padding-top: 15px;
+        }
+        #footer-text{
+            margin: 0;
+            text-align: center;
+            color: lavender;
+        }
+        .InputTable{
+            margin: auto;
+        }
+        .TextBox{
+            margin-top: 50px;
+            height: 50px;
+            width: 100%;
+            border-radius: 25px;
+            border: 2px solid #009688;
+            text-align: center;
+        }
+        .navbar{
+            width: 85%;
+            padding: 35px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar ul li{
+            list-style: none;
+            display: inline-block;
+            margin: 0 20px;
+            position: relative;
+            border: none;
+        }
+        .navbar ul li a{
+            text-decoration: none;
+            color: white;
+            text-transform: uppercase;               
+        }
+        .navbar ul li::after{
+            content: '';
+            height: 3px;
+            background: #009688;
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            transition: 0.5s;
+            border: none;
+        }
+        .navbar ul li:hover::after{
+            width: 100%;
+        }
+        .title{
+            background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);
+        }
+        #alarm {
+            margin-top: 50px;
+            height: 50px;
+            width: 100%;
+            border-radius: 25px;
+            border: 2px solid #009688;
+            text-align-last: center;
+            align-content: center;
+        }
+        .SubmitButton{
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            border-radius: 25px;
+            border: 2px solid #009688;
+            margin-top: 50px;
+            background: transparent;
+            color: rgba(23, 5, 5, 0.771);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            font-weight: bold;
+        }
+        .SubmitButton:hover{
+            background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);
+            color: lavender;
+        }
+        #divide{
+            color: rgba(199, 211, 255, 1);
+            background-color: rgba(199, 211, 255, 1);
+            height: 2px;
+            margin-left: auto;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            width: 40%;
+        }
+        .SubmitBtn{
+            margin-top: 20px;
+            width: 50%;
+            margin-left: 25%;
+            padding: 15px 0;
+            text-align: center;
+            border-radius: 25px;
+            border: 2px solid #009688;
+            background: transparent;
+            color: rgba(23, 5, 5, 0.771);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            font-weight: bold;
+        }
+        .SubmitBtn:hover{
+            background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);
+            color: lavender;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h2 id='Heading'>NODEMCU ESP8266<br>MULTIFUNCTIONAL CLOCK<br><br>Set alarm</h2>
+        </div>
+        <div class="title">
+            <div class="navbar">
+                <ul>
+                    <li><a href="/">TIME</a></li>
+                    <li><a href="/updateDate">DATE</a></li>
+                </ul>
+            </div>
+            </div>
+        <div class='content'>
+            <form action='/setAlarm' method='post'>
+                <table class="InputTable">
+                    <tr>
+                        <td>
+                            <input class="TextBox" type="text" id="Hour" name="Hour" placeholder="Enter Hour">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input class="TextBox" type="text" id="Min" name="Min" placeholder="Enter Minutes">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="alarm" name="alarm">
+                                <option id="list" value="AM">AM</option>
+                                <option id="list" value="PM">PM</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="SubmitButton" type="submit" value="Set Alarm"></td>
+                    </tr>
+                </table>
+            </form>
+            <hr id="divide">
+            <div class="modify">
+            <a href="/alarm_off"><input class="SubmitBtn" type="submit" value="Turn off "></a>
+        </div>
+        </div>
+        <div class='footer'>
+            <p id='footer-text'> Developed by : Nikhil Biby</p>
+        </div>
+    </div>
+</body>
+</html>
