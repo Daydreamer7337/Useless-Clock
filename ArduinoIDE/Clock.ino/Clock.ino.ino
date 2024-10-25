@@ -26,6 +26,7 @@ int alarm_M = 0;
 String alarm_ampm = "AM";
 int alarm_time = 20;
 int current_duration = 1;
+int display_control = 0;
 
 unsigned long previousMillis = 0;
 const long interval = 1000;
@@ -66,6 +67,7 @@ void loop() {
     previousMillis = currentMillis;
 
     Sec += 1;
+    display_control += 1;
     if (Sec >= 60) {
       Sec = 0;
       Min += 1;
@@ -109,6 +111,39 @@ void loop() {
     if(month_num > 12){
       month_num = 1;
       year += 1;
+    }
+
+    CheckChange = c;
+    c = "    ";
+    c += conv_Hour;
+    c += ":";
+    c += Min;
+    c += " ";
+    c += am_pm;
+
+    CheckChange_date = d;
+    d = day;
+    d += ", ";
+    d += date;
+    d += "-";
+    d += monthName;
+    d += "-";
+    d += year;
+
+    if(c != CheckChange || d != CheckChange_date){
+      if(display_control <= 3){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(c);
+      }
+      else if(display_control <= 6){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(d);
+      }
+    }
+    if(display_control > 6){
+      display_control = 0;
     }
   }
 }
