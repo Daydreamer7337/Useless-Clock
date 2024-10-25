@@ -93,7 +93,23 @@ void loop() {
       conv_Hour = Hour;
     }
 
-    
+    if(Hour != old_Hour){
+        if(Hour == 0){
+          date += 1;
+          day_num += 1;
+          fetchDayName();
+        }
+    }
+    if(date > daysInMonth){
+      date = 1;
+      month_num += 1;
+      fetchDaysInMonth();
+      fetchMonthName();
+    }
+    if(month_num > 12){
+      month_num = 1;
+      year += 1;
+    }
   }
 }
 
@@ -213,5 +229,87 @@ void handleSetAlarm(){
   else{
     String invalid = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Clock</title><style>body{margin:0;}.header{height:60px;width:100%;background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);padding-top:10px;}#Heading{margin:0;text-align:center;color:lavender;font-family:Helvetica Neue, Arial, Helvetica, sans-serif;font-weight:bold;font-size:100%;}.content{height:750px;width:100%;background:linear-gradient(0deg, rgba(96,63,131,1) 0%, rgba(199,211,212,1) 1%, rgba(199,211,212,1) 99%, rgba(96,63,131,1) 100%);} .footer{height:60px;width:100%;background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);padding-top:15px;}#footer-text{margin:0;text-align:center;color:lavender;}.SubmitBtn{margin-top:50px;margin-left:25%;}.navbar{width:85%;padding:35px 0;display:flex;align-items:center;justify-content:space-between;}.navbar ul li{list-style:none;display:inline-block;margin:0 20px;position:relative;border:none;}.navbar ul li a{text-decoration:none;color:white;text-transform:uppercase;} .navbar ul li::after{content:'';height:3px;background:#009688;position:absolute;left:0;bottom:-10px;transition:0.5s;border:none;}.navbar ul li:hover::after{width:100%;}.title{background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);} #Txt{margin-top:50%;text-align:center;color:rgba(23, 5, 5, 0.771);} .SubmitButton{margin-top:20px;width:100%;padding:15px 0;text-align:center;border-radius:25px;border:2px solid #009688;margin-top:50px;background:transparent;color:rgba(23, 5, 5, 0.771);cursor:pointer;position:relative;overflow:hidden;font-weight:bold;}.SubmitButton:hover{background:linear-gradient(90deg, #3E3458 0%, #5F4B8B 50%, #3E3458 100%);color:lavender;}.InputTable{margin:auto;}</style></head><body><div class='container'><div class='header'><h1 id='Heading'>NODEMCU ESP8266<br>MULTIFUNCTIONAL CLOCK<br><br>INVALID INPUT</h1></div><div class='title'><div class='navbar'><ul><li><a href='/'>TIME</a></li><li><a href='/updateDate'>DATE</a></li><li><a href='/updateAlarm'>ALARM</a></li></ul></div></div><div class='content'><table class='InputTable'><tr><td><h1 id='Txt'>INVALID INPUT</h1></td></tr></table></div><div class='footer'><p id='footer-text'> Developed by : Nikhil Biby</p></div></div></body></html>";
     server.send(200, "text/html", invalid);
+  }
+}
+
+void fetchMonthName(){
+  switch(month_num){
+      case 1:
+        monthName = "Jan";
+        break;
+      case 2:
+        monthName = "Feb";
+        break;
+      case 3:
+        monthName = "Mar";
+        break;
+      case 4:
+        monthName = "Apr";
+        break;
+      case 5:
+        monthName = "May";
+        break;
+      case 6:
+        monthName = "Jun";
+        break;
+      case 7:
+        monthName = "Jul";
+        break;
+      case 8:
+        monthName = "Aug";
+        break;
+      case 9:
+        monthName = "Sep";
+        break;
+      case 10:
+        monthName = "Oct";
+        break;
+      case 11:
+        monthName = "Nov";
+        break;
+      case 12:
+        monthName = "Dec";
+        break; 
+    }
+}
+void fetchDayName(){
+  switch(day_num){
+    case 1:
+      day = "Mon";
+      break;
+    case 2:
+      day = "Tue";
+      break;
+    case 3:
+      day = "Wed";
+      break;
+    case 4:
+      day = "Thu";
+      break;
+    case 5:
+      day = "Fri";
+      break;
+    case 6:
+      day = "Sat";
+      break;
+    case 7:
+      day = "Sun";
+      break;
+  }
+}
+void fetchDaysInMonth(){
+  if(month_num == 4 || month_num == 6 || month_num == 9 || month_num == 9){
+    daysInMonth = 30;
+  }
+  if(month_num == 1 || month_num == 3 || month_num == 5 || month_num == 7 || month_num == 8 || month_num == 10 || month_num == 12){
+    daysInMonth = 31;
+  }
+  if(month_num == 2){
+    if(year%4 == 0){
+      daysInMonth = 29;
+    }
+    else{
+      daysInMonth = 28;
+    }
   }
 }
