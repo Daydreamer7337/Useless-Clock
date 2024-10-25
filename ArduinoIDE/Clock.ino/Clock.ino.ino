@@ -57,6 +57,44 @@ void setup() {
 }
 
 void loop() {
+  int conv_Hour = 1;
+  String CheckChange;
+  String CheckChange_date;
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    Sec += 1;
+    if (Sec >= 60) {
+      Sec = 0;
+      Min += 1;
+    }
+
+    if (Min >= 60) {
+      Min = 0;
+      old_Hour = Hour;
+      Hour += 1;
+    }
+
+    if (Hour >= 24) {
+      Hour = 0;
+      am_pm = "AM";
+    }
+
+    if(Hour >= 12){
+      am_pm = "PM";
+    }
+
+    if(Hour > 12){
+      conv_Hour = Hour - 12;
+    }
+    else{
+      conv_Hour = Hour;
+    }
+
+    
+  }
 }
 
 void AlarmOff(){
@@ -87,14 +125,11 @@ void handleSetTime() {
   String Min_ = server.arg("Min");
   String Sec_ = server.arg("Sec");
 
-  // Convert string to int and check validity
   int newHour = Hour_.toInt();
   int newMin = Min_.toInt();
   int newSec = Sec_.toInt();
 
-  // Check validity of input values
   if (newHour >= 0 && newHour < 24 && newMin >= 0 && newMin < 60 && newSec >= 0 && newSec < 60) {
-    // Update time variables only if input is valid
     Hour = newHour;
     Min = newMin;
     Sec = newSec;
@@ -110,19 +145,16 @@ void handleSetTime() {
 void handleSetDate(){
   int old_month_num;
   int old_year;
-  //Recive data from client.
   String Date_ = server.arg("Date");
   String Month_num_ = server.arg("month_num");
   String Year_ = server.arg("Year");
   String Day_ = server.arg("Day");
 
-  //Cnvert data to int.
   int newDate = Date_.toInt();
   int newMonth_num = Month_num_.toInt();
   int newYear = Year_.toInt();
   int newDay_num = Day_.toInt();
 
-  //Check if input is valid.
   if(newMonth_num > 0 && newMonth_num <=12 && newDate > 0 && newDay_num >0 && newDay_num <=7){
     old_month_num = month_num;
     old_year = year;
