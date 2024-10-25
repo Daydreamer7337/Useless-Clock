@@ -1,3 +1,25 @@
+/*
+  The circuit:
+ * LCD RS pin to digital pin D0
+ * LCD Enable pin to digital pin D1
+ * LCD D4 pin to digital pin D2
+ * LCD D5 pin to digital pin D3
+ * LCD D6 pin to digital pin D4
+ * LCD D7 pin to digital pin D5
+ * LCD R/W pin to ground
+ * LCD VSS pin to ground
+ * LCD VCC pin to 5V
+ * 10K resistor:
+ * ends to +5V and ground
+ * wiper to LCD VO pin (pin 3)
+ * A to +5e
+ * K to ground
+ * Buzzer +ve pin to digital pin D6
+ * Buzzer -ve pin to ground
+ * IR sensor OUT pin to digital pin D7
+ * IR sensor VCC pin to 5V
+ * IR sensor GND pin to ground
+*/
 #include <LiquidCrystal.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -26,35 +48,39 @@ int alarm_M = 0;
 String alarm_ampm = "AM";
 int alarm_time = 20;
 int current_duration = 1;
-int display_control = 0;
+int disp_control = 0;
 
 unsigned long previousMillis = 0;
 const long interval = 1000;
 
-const char* ssid = "Clock";
+const char* ssid     = "Clock";
+
 IPAddress apIP(192, 168, 1, 1);
 ESP8266WebServer server(80);
+
 const int rs = D0, en = D1, d4 = D2, d5 = D3, d6 = D4, d7 = D5;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 void setup() {
+  Serial.begin(115200);
+
   WiFi.softAP(ssid);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  lcd.begin(16, 1);
-  lcd.setCursor(0, 0);
-  lcd.print("1234567891234567");
-  lcd.setCursor(0, 1);
-  lcd.print("1234567890123456");
+
+  lcd.begin(8, 2);
 
   server.on("/", HTTP_GET, handleTime);
   server.on("/updateDate", HTTP_GET, handleDate);
   server.on("/updateAlarm", HTTP_GET, handleAlarm);
   server.on("/alarm_off", HTTP_GET, AlarmOff);
+
   server.on("/setTime", HTTP_POST, handleSetTime);
   server.on("/setDate", HTTP_POST, handleSetDate);
   server.on("/setAlarm", HTTP_POST, handleSetAlarm);
 
   server.begin();
+  pinMode(D6,OUTPUT);
+  pinMode(D7, INPUT);
 }
 
 void loop() {
@@ -67,7 +93,7 @@ void loop() {
     previousMillis = currentMillis;
 
     Sec += 1;
-    display_control += 1;
+    disp_control += 1;
     if (Sec >= 60) {
       Sec = 0;
       Min += 1;
@@ -130,22 +156,46 @@ void loop() {
     d += "-";
     d += year;
 
-    if(c != CheckChange || d != CheckChange_date){
-      if(display_control <= 3){
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print(c);
-      }
-      else if(display_control <= 6){
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print(d);
-      }
+    if(disp_control == 1){
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print(c.substring(0,8));
+      lcd.setCursor(0, 1);
+      lcd.print(c.substring(8));
     }
-    if(display_control > 6){
-      display_control = 0;
+    else if(disp_control == 4){
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print(d.substring(0,8));
+      lcd.setCursor(0, 1);
+      lcd.print(d.substring(8));
+    }
+    if(disp_control == 6){
+        disp_control = 0;
     }
   }
+  if(alarm_ && alarm_H == conv_Hour && alarm_M == Min && alarm_ampm == am_pm){
+      if(buzz){
+        digitalWrite(D6, HIGH);
+      }
+      else{
+        digitalWrite(D6, LOW);
+      }
+      buzz = !buzz;
+      current_duration += 1;
+      if(current_duration == alarm_time){
+        alarm_ = false;
+        current_duration = 1;
+        digitalWrite(D6, LOW);
+      }
+  }
+  if(alarm_ && digitalRead(D7) == 0){
+    alarm_ = false;
+    current_duration = 1;
+    digitalWrite(D6, LOW);
+  }
+
+    server.handleClient();
 }
 
 void AlarmOff(){
@@ -160,17 +210,14 @@ void handleTime() {
   String time_site = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Clock</title><style>body{margin:0;}.header{height:60px;width:100%;background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);padding-top:10px;}#Heading{margin:0;text-align:center;color:lavender;font-family:Helvetica Neue, Arial, Helvetica, sans-serif;font-weight:bold;font-size:100%;}.content{height:750px;width:100%;background:linear-gradient(0deg,rgba(96,63,131,1) 0%,rgba(199,211,212,1) 1%,rgba(199,211,212,1) 99%,rgba(96,63,131,1) 100%);} .footer{height:60px;width:100%;background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);padding-top:15px;}#footer-text{margin:0;text-align:center;color:lavender;}.InputTable{margin:auto;}.TextBox{margin-top:50px;height:50px;width:100%;border-radius:25px;border:2px solid #009688;text-align:center;}.SubmitBtn{margin-top:50px;margin-left:25%;}.navbar{width:85%;padding:35px 0;display:flex;align-items:center;justify-content:space-between;}.navbar ul li{list-style:none;display:inline-block;margin:0 20px;position:relative;border:none;}.navbar ul li a{text-decoration:none;color:white;text-transform:uppercase;}.navbar ul li::after{content:'';height:3px;background:#009688;position:absolute;left:0;bottom:-10px;transition:0.5s;border:none;}.navbar ul li:hover::after{width:100%;}.title{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);}.SubmitButton{margin-top:20px;width:100%;padding:15px 0;text-align:center;border-radius:25px;border:2px solid #009688;margin-top:50px;background:transparent;color:rgba(23,5,5,0.771);cursor:pointer;position:relative;overflow:hidden;font-weight:bold;}.SubmitButton:hover{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);color:lavender;}</style></head><body><div class='container'><div class='header'><h1 id='Heading'>NODEMCU ESP8266<br>MULTIFUNCTIONAL CLOCK<br><br>Adjust Time</h1></div><div class='title'><div class='navbar'><ul><li><a href='/updateAlarm'>ALARM</a></li><li><a href='/updateDate'>DATE</a></li></ul></div></div><div class='content'><form action='/setTime' method='post'><table class='InputTable'><tr><td><input class='TextBox' type='text' id='Hour' name='Hour' placeholder='Enter Hours(in 24 Hrs).'></td></tr><tr><td><input class='TextBox' type='text' id='Min' name='Min' placeholder='Enter Minutes.'></td></tr><tr><td><input class='TextBox' type='text' id='Sec' name='Sec' placeholder='Enter Seconds.'></td></tr><tr><td><input class='SubmitButton' type='submit' value='Update'></td></tr></table></form></div><div class='footer'><p id='footer-text'> Developed by : Nikhil Biby</p></div></div></body></html>";
   server.send(200 , "text/html" , time_site);
 }
-
 void handleDate(){
   String date_site = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Clock</title><style>body{margin:0;}.header{height:60px;width:100%;background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);padding-top:10px;}#Heading{margin:0;text-align:center;color:lavender;font-family:Helvetica Neue, Arial, Helvetica, sans-serif;font-weight:bold;font-size:100%;}.content{height:750px;width:100%;background:linear-gradient(0deg,rgba(96,63,131,1) 0%,rgba(199,211,212,1) 1%,rgba(199,211,212,1) 99%,rgba(96,63,131,1) 100%);} .footer{height:60px;width:100%;background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);padding-top:15px;}#footer-text{margin:0;text-align:center;color:lavender;}.InputTable{margin:auto;text-align:center;}.TextBox{margin-top:50px;height:50px;width:100%;border-radius:25px;border:2px solid #009688;text-align:center;}.navbar{width:85%;padding:35px 0;display:flex;align-items:center;justify-content:space-between;}.navbar ul li{list-style:none;display:inline-block;margin:0 20px;position:relative;border:none;}.navbar ul li a{text-decoration:none;color:white;text-transform:uppercase;}.navbar ul li::after{content:'';height:3px;background:#009688;position:absolute;left:0;bottom:-10px;transition:0.5s;}.navbar ul li:hover::after{width:100%;}.title{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);}#selectionBox{margin-top:50px;height:50px;width:100%;border-radius:25px;border:2px solid #009688;text-align:center;}.SubmitButton{margin-top:20px;width:100%;padding:15px 0;text-align:center;border-radius:25px;border:2px solid #009688;margin-top:50px;background:transparent;color:rgba(23,5,5,0.771);cursor:pointer;position:relative;overflow:hidden;font-weight:bold;}.SubmitButton:hover{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);color:lavender;}</style></head><body><div class='container'><div class='header'><h1 id='Heading'>NODEMCU ESP8266<br>MULTIFUNCTIONAL CLOCK<br><br>Adjust Date, Day, Month and Year</h1></div><div class='title'><div class='navbar'><ul><li><a href='/'>TIME</a></li><li><a href='/updateAlarm'>ALARM</a></li></ul></div></div><div class='content'><form action='/setDate' method='post'><table class='InputTable'><tr><td><input class='TextBox' type='text' name='Date' id='Date' placeholder='Enter Date'></td></tr><tr><td><select name='month_num' id='selectionBox'><option value='0'>Select Month</option><option value='1'>January</option><option value='2'>February</option><option value='3'>March</option><option value='4'>April</option><option value='5'>May</option><option value='6'>June</option><option value='7'>July</option><option value='8'>August</option><option value='9'>September</option><option value='10'>October</option><option value='11'>November</option><option value='12'>December</option></select></td></tr><tr><td><input class='TextBox' type='text' name='Year' id='Year' placeholder='Enter Year'></td></tr><tr><td><select name='Day' id='selectionBox'><option value='0'>Select Day</option><option value='1'>Monday</option><option value='2'>Tuesday</option><option value='3'>Wednesday</option><option value='4'>Thursday</option><option value='5'>Friday</option><option value='6'>Saturday</option><option value='7'>Sunday</option></select></td></tr><tr><td><input class='SubmitButton' type='submit' value='Update'></td></tr></table></form></div><div class='footer'><p id='footer-text'> Developed by : Nikhil Biby</p></div></div></body></html>";
   server.send(200 , "text/html" , date_site);
 }
-
 void handleAlarm(){
   String alarm_site = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Clock</title><style>body{margin:0;}.header{height:60px;width:100%;background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);padding-top:10px;}#Heading{margin:0;text-align:center;color:lavender;font-family:Helvetica Neue,Arial,Helvetica,sans-serif;font-weight:bold;font-size:100%;}.content{height:750px;width:100%;background:linear-gradient(0deg,rgba(96,63,131,1) 0%,rgba(199,211,212,1) 1%,rgba(199,211,212,1) 99%,rgba(96,63,131,1) 100%);} .footer{height:60px;width:100%;background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);padding-top:15px;}#footer-text{margin:0;text-align:center;color:lavender;}.InputTable{margin:auto;}.TextBox{margin-top:50px;height:50px;width:100%;border-radius:25px;border:2px solid #009688;text-align:center;}.navbar{width:85%;padding:35px 0;display:flex;align-items:center;justify-content:space-between;}.navbar ul li{list-style:none;display:inline-block;margin:0 20px;position:relative;border:none;}.navbar ul li a{text-decoration:none;color:white;text-transform:uppercase;}.navbar ul li::after{content:'';height:3px;background:#009688;position:absolute;left:0;bottom:-10px;transition:0.5s;border:none;}.navbar ul li:hover::after{width:100%;}.title{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);}#alarm{margin-top:50px;height:50px;width:100%;border-radius:25px;border:2px solid #009688;text-align-last:center;align-content:center;}.SubmitButton{margin-top:20px;width:100%;padding:15px 0;text-align:center;border-radius:25px;border:2px solid #009688;margin-top:50px;background:transparent;color:rgba(23,5,5,0.771);cursor:pointer;position:relative;overflow:hidden;font-weight:bold;}.SubmitButton:hover{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);color:lavender;}.#divide{color:rgba(199,211,255,1);background-color:rgba(199,211,255,1);height:2px;margin-left:auto;margin-top:50px;margin-bottom:50px;width:40%;}.SubmitBtn{margin-top:20px;width:50%;margin-left:25%;padding:15px 0;text-align:center;border-radius:25px;border:2px solid #009688;background:transparent;color:rgba(23,5,5,0.771);cursor:pointer;position:relative;overflow:hidden;font-weight:bold;}.SubmitBtn:hover{background:linear-gradient(90deg,#3E3458 0%,#5F4B8B 50%,#3E3458 100%);color:lavender;}</style></head><body><div class='container'><div class='header'><h1 id='Heading'>NODEMCU ESP8266<br>MULTIFUNCTIONAL CLOCK<br><br>Set alarm</h1></div><div class='title'><div class='navbar'><ul><li><a href='/'>TIME</a></li><li><a href='/updateDate'>DATE</a></li></ul></div></div><div class='content'><form action='/setAlarm' method='post'><table class='InputTable'><tr><td><input class='TextBox' type='text' id='Hour' name='Hour' placeholder='Enter Hour'></td></tr><tr><td><input class='TextBox' type='text' id='Min' name='Min' placeholder='Enter Minutes'></td></tr><tr><td><select id='alarm' name='alarm'><option id='list' value='AM'>AM</option><option id='list' value='PM'>PM</option></select></td></tr><tr><td><input class='SubmitButton' type='submit' value='Set Alarm'></td></tr></table></form><hr id='divide'><div class='modify'><a href='/alarm_off'><input class='SubmitBtn' type='submit' value='Turn off '></a></div></div><div class='footer'><p id='footer-text'> Developed by : Nikhil Biby</p></div></div></body></html>";
   server.send(200, "text/html", alarm_site);
 }
-
 void handleSetTime() {
   String Hour_ = server.arg("Hour");
   String Min_ = server.arg("Min");
@@ -192,7 +239,6 @@ void handleSetTime() {
     server.send(200, "text/html", invalid);
   }
 }
-
 void handleSetDate(){
   int old_month_num;
   int old_year;
@@ -237,7 +283,6 @@ void handleSetDate(){
     server.send(200, "text/html", invalid);
   }
 }
-
 void handleSetAlarm(){
   String al_H = server.arg("Hour");
   String al_M = server.arg("Min");
