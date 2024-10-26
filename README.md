@@ -81,7 +81,7 @@ Circuit is being wired.
 
 ### Project Demo
 # Video
-https://drive.google.com/file/d/1cSRRx6zWlV5za5vh6XPp75ZeI7u50nt1/view?usp=drivesdk
+https://drive.google.com/file/d/1cntyC-NRMqg0oq6JR89CVHETsMQm8lSD/view?usp=drivesdk
 This video shows time being updated through website. Similarly, the date, say, month and year can be adjusted through this website. Alarm can also be set in a similar way. When ringing, the alarm can be turned off by either hovering your hand over the IR sensor or by clicking turn off alarm button in website.
 
 ## Team Contributions
