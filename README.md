@@ -34,7 +34,7 @@ For Hardware:
 ### Implementation
 Used Arduino IDE
 # Installation
-No istallations required, power it up and go!
+No installations required, power it up and go!
 
 # Run
 On turning on the clock, connect to the WiFi hotspot named "Clock". On connecting, open your browser and type in the ip "192.168.1.1" in the address bar. Adjust date and time in the displayed website.
